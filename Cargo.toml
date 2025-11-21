@@ -1,0 +1,24 @@
+[package]
+name = "terraform-plan-formatter"
+version = "0.1.0"
+edition = "2021"
+description = "A CLI tool to format Terraform plan output in human-readable format"
+license = "MIT"
+repository = "https://github.com/example/terraform-plan-formatter"
+homepage = "https://github.com/example/terraform-plan-formatter"
+documentation = "https://docs.rs/terraform-plan-formatter"
+readme = "README.md"
+keywords = ["terraform", "cli", "formatting", "devops"]
+categories = ["command-line-utilities", "development-tools"]
+authors = ["Your Name <your.email@example.com>"]
+exclude = ["target/", ".github/", "Formula/", "snap/", "tools/"]
+
+[[bin]]
+name = "tfplan"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+colored = "3.0.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>tfplan</id>
+    <version>0.1.0</version>
+    <packageSourceUrl>https://github.com/example/terraform-plan-formatter</packageSourceUrl>
+    <owners>example</owners>
+    <title>Terraform Plan Formatter</title>
+    <authors>Your Name</authors>
+    <projectUrl>https://github.com/example/terraform-plan-formatter</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/example/terraform-plan-formatter/main/icon.png</iconUrl>
+    <copyright>2024 Your Name</copyright>
+    <licenseUrl>https://github.com/example/terraform-plan-formatter/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/example/terraform-plan-formatter</projectSourceUrl>
+    <docsUrl>https://github.com/example/terraform-plan-formatter/blob/main/README.md</docsUrl>
+    <bugTrackerUrl>https://github.com/example/terraform-plan-formatter/issues</bugTrackerUrl>
+    <tags>terraform cli devops infrastructure</tags>
+    <summary>Format Terraform plan output in human-readable format with HTML support</summary>
+    <description>A minimal CLI tool to format Terraform plan output in a beautiful, human-readable format with expandable HTML output. Features color-coded output, interactive mode, and cross-platform support.</description>
+    <releaseNotes>https://github.com/example/terraform-plan-formatter/releases</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
