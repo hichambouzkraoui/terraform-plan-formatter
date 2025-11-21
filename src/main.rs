@@ -11,15 +11,15 @@ struct Cli {
     /// Path to Terraform plan JSON file (use - for stdin)
     #[arg(value_name = "FILE")]
     file: Option<String>,
-    
+
     /// Show collapsed view (only resource headers)
     #[arg(short, long)]
     collapsed: bool,
-    
+
     /// Interactive mode - press number to expand/collapse resources
     #[arg(short, long)]
     interactive: bool,
-    
+
     /// Output as HTML with expandable sections
     #[arg(long)]
     html: bool,
@@ -46,7 +46,7 @@ struct Change {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
-    
+
     let content = match cli.file.as_deref() {
         Some("-") | None => {
             let mut buffer = String::new();
@@ -57,7 +57,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let plan: TerraformPlan = serde_json::from_str(&content)?;
-    
+
     if cli.html {
         html_format(&plan);
     } else if cli.interactive {
@@ -65,7 +65,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     } else {
         format_plan(&plan, cli.collapsed);
     }
-    
+
     Ok(())
 }
 
@@ -98,14 +98,22 @@ fn format_plan(plan: &TerraformPlan, collapsed: bool) {
     }
 
     println!();
-    println!("{}", "────────────────────────────────────────────────────────────────────────────────".bright_black());
+    println!(
+        "{}",
+        "────────────────────────────────────────────────────────────────────────────────"
+            .bright_black()
+    );
     println!();
-    
+
     let total_changes = create_count + update_count + replace_count + delete_count;
     if total_changes == 0 {
-        println!("{}", "No changes. Your infrastructure matches the configuration.".bright_green());
+        println!(
+            "{}",
+            "No changes. Your infrastructure matches the configuration.".bright_green()
+        );
     } else {
-        println!("{}: {} to add, {} to change, {} to destroy.", 
+        println!(
+            "{}: {} to add, {} to change, {} to destroy.",
             "Plan".bold(),
             create_count.to_string().bright_green(),
             (update_count + replace_count).to_string().bright_yellow(),
@@ -139,14 +147,15 @@ fn print_resource_change(change: &ResourceChange, action: &str, color: &str, col
     };
 
     let expand_indicator = if collapsed { "▶" } else { "▼" };
-    
-    println!("{} {} {} will be {}", 
+
+    println!(
+        "{} {} {} will be {}",
         expand_indicator.bright_black(),
         colored_symbol,
         change.address.bold(),
         action_text
     );
-    
+
     if !collapsed {
         if action == "update" || action == "replace" {
             print_changes(&change.change);
@@ -154,7 +163,7 @@ fn print_resource_change(change: &ResourceChange, action: &str, color: &str, col
             print_create_attributes(&change.change);
         }
     }
-    
+
     println!();
 }
 
@@ -164,7 +173,8 @@ fn print_changes(change: &Change) {
             for (key, after_val) in after_obj {
                 if let Some(before_val) = before_obj.get(key) {
                     if before_val != after_val {
-                        println!("        {}: {} {} {}", 
+                        println!(
+                            "        {}: {} {} {}",
                             key.bright_white(),
                             format_value(before_val).bright_red(),
                             "=>".bright_black(),
@@ -172,7 +182,8 @@ fn print_changes(change: &Change) {
                         );
                     }
                 } else {
-                    println!("        {}: {}", 
+                    println!(
+                        "        {}: {}",
                         key.bright_white(),
                         format_value(after_val).bright_green()
                     );
@@ -180,7 +191,8 @@ fn print_changes(change: &Change) {
             }
             for (key, before_val) in before_obj {
                 if !after_obj.contains_key(key) {
-                    println!("        {}: {} {} {}", 
+                    println!(
+                        "        {}: {} {} {}",
                         key.bright_white(),
                         format_value(before_val).bright_red(),
                         "=>".bright_black(),
@@ -196,8 +208,9 @@ fn print_create_attributes(change: &Change) {
     if let Some(after) = &change.after {
         if let Some(after_obj) = after.as_object() {
             for (key, val) in after_obj {
-                println!("        {}: {}", 
-                    key.bright_white(), 
+                println!(
+                    "        {}: {}",
+                    key.bright_white(),
                     format_value(val).bright_green()
                 );
             }
@@ -207,32 +220,40 @@ fn print_create_attributes(change: &Change) {
 
 fn interactive_format(plan: &TerraformPlan) -> Result<(), Box<dyn std::error::Error>> {
     let mut expanded: std::collections::HashSet<usize> = std::collections::HashSet::new();
-    
+
     loop {
         print!("\x1B[2J\x1B[1;1H"); // Clear screen
-        
+
         println!("Interactive Plan (Enter number to toggle, 'a' for all, 'c' to collapse all, 'q' to quit):");
         println!();
-        
+
         for (i, change) in plan.resource_changes.iter().enumerate() {
             let is_expanded = expanded.contains(&i);
             print_interactive_resource(i, change, is_expanded);
         }
-        
+
         print!("\nCommand: ");
         io::stdout().flush()?;
-        
+
         let mut input = String::new();
         io::stdin().read_line(&mut input)?;
-        
+
         match input.trim() {
             "q" => break,
-            "a" => { for i in 0..plan.resource_changes.len() { expanded.insert(i); } }
+            "a" => {
+                for i in 0..plan.resource_changes.len() {
+                    expanded.insert(i);
+                }
+            }
             "c" => expanded.clear(),
             n => {
                 if let Ok(idx) = n.parse::<usize>() {
                     if idx < plan.resource_changes.len() {
-                        if expanded.contains(&idx) { expanded.remove(&idx); } else { expanded.insert(idx); }
+                        if expanded.contains(&idx) {
+                            expanded.remove(&idx);
+                        } else {
+                            expanded.insert(idx);
+                        }
                     }
                 }
             }
@@ -249,7 +270,7 @@ fn print_interactive_resource(index: usize, change: &ResourceChange, is_expanded
         [a1, a2] if a1 == "delete" && a2 == "create" => ("replaced", "yellow"),
         _ => ("unknown", "white"),
     };
-    
+
     let symbol = match action {
         "created" => "+".bright_green().bold(),
         "changed" => "~".bright_yellow().bold(),
@@ -257,17 +278,18 @@ fn print_interactive_resource(index: usize, change: &ResourceChange, is_expanded
         "replaced" => "-/+".bright_yellow().bold(),
         _ => "?".normal(),
     };
-    
+
     let indicator = if is_expanded { "▼" } else { "▶" };
-    
-    println!("{} {} {} {} will be {}", 
+
+    println!(
+        "{} {} {} {} will be {}",
         format!("[{}]", index).bright_cyan(),
         indicator.bright_black(),
         symbol,
         change.address.bold(),
         action.color(color)
     );
-    
+
     if is_expanded {
         match action {
             "changed" | "replaced" => print_changes(&change.change),
@@ -279,7 +301,8 @@ fn print_interactive_resource(index: usize, change: &ResourceChange, is_expanded
 }
 
 fn html_format(plan: &TerraformPlan) {
-    println!(r#"<!DOCTYPE html>
+    println!(
+        r#"<!DOCTYPE html>
 <html>
 <head>
     <title>Terraform Plan</title>
@@ -305,7 +328,8 @@ fn html_format(plan: &TerraformPlan) {
 </head>
 <body>
     <h1>Terraform Plan</h1>
-"#);
+"#
+    );
 
     let mut create_count = 0;
     let mut update_count = 0;
@@ -334,13 +358,19 @@ fn html_format(plan: &TerraformPlan) {
         }
     }
 
-    println!(r#"    <div class="summary">
+    println!(
+        r#"    <div class="summary">
         <h3>Plan Summary</h3>
         <p><span style="color: #4ec9b0;">{}</span> to add, <span style="color: #dcdcaa;">{}</span> to change, <span style="color: #f44747;">{}</span> to destroy.</p>
     </div>
-"#, create_count, update_count + replace_count, delete_count);
+"#,
+        create_count,
+        update_count + replace_count,
+        delete_count
+    );
 
-    println!(r#"    <script>
+    println!(
+        r#"    <script>
         function toggleResource(id) {{
             const details = document.getElementById('details-' + id);
             const header = document.getElementById('header-' + id);
@@ -354,7 +384,8 @@ fn html_format(plan: &TerraformPlan) {
         }}
     </script>
 </body>
-</html>"#);
+</html>"#
+    );
 }
 
 fn print_html_resource(index: usize, change: &ResourceChange, action: &str, css_class: &str) {
@@ -374,12 +405,15 @@ fn print_html_resource(index: usize, change: &ResourceChange, action: &str, css_
         _ => "?",
     };
 
-    println!(r#"    <div class="resource">
+    println!(
+        r#"    <div class="resource">
         <div class="resource-header {}" id="header-{}" onclick="toggleResource({})">
             <span class="expand-icon">▶</span> {} <strong>{}</strong> will be {}
         </div>
         <div class="details" id="details-{}">
-"#, css_class, index, index, symbol, change.address, action_text, index);
+"#,
+        css_class, index, index, symbol, change.address, action_text, index
+    );
 
     if action == "update" || action == "replace" {
         print_html_changes(&change.change);
@@ -397,22 +431,24 @@ fn print_html_changes(change: &Change) {
             for (key, after_val) in after_obj {
                 if let Some(before_val) = before_obj.get(key) {
                     if before_val != after_val {
-                        println!(r#"            <div class="attribute">
+                        println!(
+                            r#"            <div class="attribute">
                 <span class="key">{}:</span> 
                 <span class="value-old">{}</span> 
                 <span class="arrow">=></span> 
                 <span class="value-new">{}</span>
-            </div>"#, 
+            </div>"#,
                             html_escape(key),
                             html_escape(&format_value(before_val)),
                             html_escape(&format_value(after_val))
                         );
                     }
                 } else {
-                    println!(r#"            <div class="attribute">
+                    println!(
+                        r#"            <div class="attribute">
                 <span class="key">{}:</span> 
                 <span class="value-new">{}</span>
-            </div>"#, 
+            </div>"#,
                         html_escape(key),
                         html_escape(&format_value(after_val))
                     );
@@ -420,12 +456,13 @@ fn print_html_changes(change: &Change) {
             }
             for (key, before_val) in before_obj {
                 if !after_obj.contains_key(key) {
-                    println!(r#"            <div class="attribute">
+                    println!(
+                        r#"            <div class="attribute">
                 <span class="key">{}:</span> 
                 <span class="value-old">{}</span> 
                 <span class="arrow">=></span> 
                 <span class="value-old">null</span>
-            </div>"#, 
+            </div>"#,
                         html_escape(key),
                         html_escape(&format_value(before_val))
                     );
@@ -439,10 +476,11 @@ fn print_html_create_attributes(change: &Change) {
     if let Some(after) = &change.after {
         if let Some(after_obj) = after.as_object() {
             for (key, val) in after_obj {
-                println!(r#"            <div class="attribute">
+                println!(
+                    r#"            <div class="attribute">
                 <span class="key">{}:</span> 
                 <span class="value-new">{}</span>
-            </div>"#, 
+            </div>"#,
                     html_escape(key),
                     html_escape(&format_value(val))
                 );
@@ -453,10 +491,10 @@ fn print_html_create_attributes(change: &Change) {
 
 fn html_escape(s: &str) -> String {
     s.replace('&', "&amp;")
-     .replace('<', "&lt;")
-     .replace('>', "&gt;")
-     .replace('"', "&quot;")
-     .replace('\'', "&#x27;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
+        .replace('\'', "&#x27;")
 }
 
 fn format_value(value: &serde_json::Value) -> String {
