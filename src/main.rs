@@ -34,7 +34,6 @@ struct TerraformPlan {
 struct ResourceChange {
     address: String,
     change: Change,
-    r#type: String,
 }
 
 #[derive(Deserialize)]
@@ -79,19 +78,19 @@ fn format_plan(plan: &TerraformPlan, collapsed: bool) {
         match change.change.actions.as_slice() {
             [action] if action == "create" => {
                 create_count += 1;
-                print_resource_change(&change, "create", "green", collapsed);
+                print_resource_change(change, "create", "green", collapsed);
             }
             [action] if action == "update" => {
                 update_count += 1;
-                print_resource_change(&change, "update", "yellow", collapsed);
+                print_resource_change(change, "update", "yellow", collapsed);
             }
             [action] if action == "delete" => {
                 delete_count += 1;
-                print_resource_change(&change, "destroy", "red", collapsed);
+                print_resource_change(change, "destroy", "red", collapsed);
             }
             [action1, action2] if action1 == "delete" && action2 == "create" => {
                 replace_count += 1;
-                print_resource_change(&change, "replace", "yellow", collapsed);
+                print_resource_change(change, "replace", "yellow", collapsed);
             }
             _ => {}
         }
@@ -340,19 +339,19 @@ fn html_format(plan: &TerraformPlan) {
         match change.change.actions.as_slice() {
             [action] if action == "create" => {
                 create_count += 1;
-                print_html_resource(i, &change, "create", "create");
+                print_html_resource(i, change, "create", "create");
             }
             [action] if action == "update" => {
                 update_count += 1;
-                print_html_resource(i, &change, "update", "update");
+                print_html_resource(i, change, "update", "update");
             }
             [action] if action == "delete" => {
                 delete_count += 1;
-                print_html_resource(i, &change, "destroy", "destroy");
+                print_html_resource(i, change, "destroy", "destroy");
             }
             [action1, action2] if action1 == "delete" && action2 == "create" => {
                 replace_count += 1;
-                print_html_resource(i, &change, "replace", "replace");
+                print_html_resource(i, change, "replace", "replace");
             }
             _ => {}
         }
