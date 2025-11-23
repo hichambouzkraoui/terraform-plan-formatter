@@ -101,10 +101,12 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
 
   publish-crates:
     needs: release
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v4
@@ -114,6 +116,7 @@ jobs:
   publish-homebrew:
     needs: release
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Update Homebrew Formula
@@ -126,6 +129,7 @@ jobs:
     needs: release
     runs-on: windows-latest
     if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v4
       - name: Pack and Push to Chocolatey
@@ -136,6 +140,7 @@ jobs:
   publish-aur:
     needs: release
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Update AUR Package
@@ -150,6 +155,7 @@ jobs:
   publish-snap:
     needs: release
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v4
