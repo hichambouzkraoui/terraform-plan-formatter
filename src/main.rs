@@ -53,8 +53,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-
-
 fn print_changes(change: &Change) {
     if let (Some(before), Some(after)) = (&change.before, &change.after) {
         if let (Some(before_obj), Some(after_obj)) = (before.as_object(), after.as_object()) {
