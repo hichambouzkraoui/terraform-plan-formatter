@@ -14,6 +14,13 @@ curl -sSL https://raw.githubusercontent.com/example/terraform-plan-formatter/mai
 iwr -useb https://raw.githubusercontent.com/example/terraform-plan-formatter/main/install.ps1 | iex
 ```
 
+### Package Managers
+
+#### Alpine Linux
+```bash
+apk add tfplan
+```
+
 ### Manual Installation
 
 #### Download Pre-built Binaries

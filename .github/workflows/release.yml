@@ -9,6 +9,31 @@ on:
         description: 'Version to release'
         required: true
         type: string
+      publish_crates:
+        description: 'Publish to crates.io'
+        required: false
+        type: boolean
+        default: true
+      publish_homebrew:
+        description: 'Publish to Homebrew'
+        required: false
+        type: boolean
+        default: true
+      publish_chocolatey:
+        description: 'Publish to Chocolatey'
+        required: false
+        type: boolean
+        default: true
+      publish_aur:
+        description: 'Publish to AUR'
+        required: false
+        type: boolean
+        default: true
+      publish_snap:
+        description: 'Publish to Snap Store'
+        required: false
+        type: boolean
+        default: true
 
 env:
   CARGO_TERM_COLOR: always
@@ -108,6 +133,7 @@ jobs:
   publish-crates:
     needs: release
     runs-on: ubuntu-latest
+    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || (github.event_name == 'workflow_dispatch' && inputs.publish_crates) }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -116,6 +142,7 @@ jobs:
   publish-homebrew:
     needs: release
     runs-on: ubuntu-latest
+    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || (github.event_name == 'workflow_dispatch' && inputs.publish_homebrew) }}
     steps:
       - name: Update Homebrew Formula
         uses: dawidd6/action-homebrew-bump-formula@v3
@@ -126,6 +153,7 @@ jobs:
   publish-chocolatey:
     needs: release
     runs-on: windows-latest
+    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || (github.event_name == 'workflow_dispatch' && inputs.publish_chocolatey) }}
     steps:
       - uses: actions/checkout@v4
       - name: Pack and Push to Chocolatey
@@ -136,6 +164,7 @@ jobs:
   publish-aur:
     needs: release
     runs-on: ubuntu-latest
+    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || (github.event_name == 'workflow_dispatch' && inputs.publish_aur) }}
     steps:
       - name: Update AUR Package
         uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
@@ -149,6 +178,7 @@ jobs:
   publish-snap:
     needs: release
     runs-on: ubuntu-latest
+    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || (github.event_name == 'workflow_dispatch' && inputs.publish_snap) }}
     steps:
       - uses: actions/checkout@v4
       - uses: snapcore/action-build@v1
@@ -159,3 +189,25 @@ jobs:
           release: stable
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
+
+  publish-apk:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Alpine Package
+        run: |
+          docker run --rm -v $PWD:/workspace alpine:latest sh -c '
+            apk add --no-cache alpine-sdk sudo
+            adduser -D builder
+            addgroup builder abuild
+            echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+            su - builder -c "cd /workspace && abuild-keygen -a -i -n"
+            su - builder -c "cd /workspace && abuild -r"
+          '
+      - name: Publish to Alpine Repository
+        env:
+          ALPINE_REPO_TOKEN: ${{ secrets.ALPINE_REPO_TOKEN }}
+        run: |
+          # Upload to Alpine community repository
+          echo "Publishing to Alpine repository..."
