@@ -3,37 +3,9 @@ name: Release
 on:
   push:
     tags: ['v*']
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release'
-        required: true
-        type: string
-      publish_crates:
-        description: 'Publish to crates.io'
-        required: false
-        type: boolean
-        default: true
-      publish_homebrew:
-        description: 'Publish to Homebrew'
-        required: false
-        type: boolean
-        default: true
-      publish_chocolatey:
-        description: 'Publish to Chocolatey'
-        required: false
-        type: boolean
-        default: true
-      publish_aur:
-        description: 'Publish to AUR'
-        required: false
-        type: boolean
-        default: true
-      publish_snap:
-        description: 'Publish to Snap Store'
-        required: false
-        type: boolean
-        default: true
+
+permissions:
+  contents: write
 
 env:
   CARGO_TERM_COLOR: always
@@ -121,28 +93,19 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
       
-      - name: Create and push tag for manual dispatch
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag ${{ inputs.version }}
-          git push origin ${{ inputs.version }}
-      
       - name: Create Release
         id: release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
           files: '**/*'
           generate_release_notes: true
           draft: false
-          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') || (github.event_name == 'workflow_dispatch' && (contains(inputs.version, 'alpha') || contains(inputs.version, 'beta') || contains(inputs.version, 'rc'))) }}
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
 
   publish-crates:
     needs: release
     runs-on: ubuntu-latest
-    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || (github.event_name == 'workflow_dispatch' && inputs.publish_crates) }}
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -151,7 +114,7 @@ jobs:
   publish-homebrew:
     needs: release
     runs-on: ubuntu-latest
-    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || (github.event_name == 'workflow_dispatch' && inputs.publish_homebrew) }}
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Update Homebrew Formula
         uses: dawidd6/action-homebrew-bump-formula@v3
@@ -162,7 +125,7 @@ jobs:
   publish-chocolatey:
     needs: release
     runs-on: windows-latest
-    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || (github.event_name == 'workflow_dispatch' && inputs.publish_chocolatey) }}
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v4
       - name: Pack and Push to Chocolatey
@@ -173,7 +136,7 @@ jobs:
   publish-aur:
     needs: release
     runs-on: ubuntu-latest
-    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || (github.event_name == 'workflow_dispatch' && inputs.publish_aur) }}
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Update AUR Package
         uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
@@ -187,7 +150,7 @@ jobs:
   publish-snap:
     needs: release
     runs-on: ubuntu-latest
-    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || (github.event_name == 'workflow_dispatch' && inputs.publish_snap) }}
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/checkout@v4
       - uses: snapcore/action-build@v1
