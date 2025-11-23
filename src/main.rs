@@ -2,7 +2,7 @@ use clap::Parser;
 use colored::*;
 use std::fs;
 use std::io::{self, Read, Write};
-use terraform_plan_formatter::{TerraformPlan, ResourceChange, Change};
+use terraform_plan_formatter::{Change, ResourceChange, TerraformPlan};
 
 #[derive(Parser)]
 #[command(name = "tfplan")]
@@ -25,8 +25,6 @@ struct Cli {
     html: bool,
 }
 
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
@@ -46,109 +44,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     } else if cli.interactive {
         interactive_format(&plan)?;
     } else {
-        print!("{}", terraform_plan_formatter::format_plan(&plan, cli.collapsed));
+        print!(
+            "{}",
+            terraform_plan_formatter::format_plan(&plan, cli.collapsed)
+        );
     }
 
     Ok(())
 }
 
-fn format_plan(plan: &TerraformPlan, collapsed: bool) {
-    let mut create_count = 0;
-    let mut update_count = 0;
-    let mut delete_count = 0;
-    let mut replace_count = 0;
 
-    for change in &plan.resource_changes {
-        match change.change.actions.as_slice() {
-            [action] if action == "create" => {
-                create_count += 1;
-                print_resource_change(change, "create", "green", collapsed);
-            }
-            [action] if action == "update" => {
-                update_count += 1;
-                print_resource_change(change, "update", "yellow", collapsed);
-            }
-            [action] if action == "delete" => {
-                delete_count += 1;
-                print_resource_change(change, "destroy", "red", collapsed);
-            }
-            [action1, action2] if action1 == "delete" && action2 == "create" => {
-                replace_count += 1;
-                print_resource_change(change, "replace", "yellow", collapsed);
-            }
-            _ => {}
-        }
-    }
-
-    println!();
-    println!(
-        "{}",
-        "────────────────────────────────────────────────────────────────────────────────"
-            .bright_black()
-    );
-    println!();
-
-    let total_changes = create_count + update_count + replace_count + delete_count;
-    if total_changes == 0 {
-        println!(
-            "{}",
-            "No changes. Your infrastructure matches the configuration.".bright_green()
-        );
-    } else {
-        println!(
-            "{}: {} to add, {} to change, {} to destroy.",
-            "Plan".bold(),
-            create_count.to_string().bright_green(),
-            (update_count + replace_count).to_string().bright_yellow(),
-            delete_count.to_string().bright_red()
-        );
-    }
-}
-
-fn print_resource_change(change: &ResourceChange, action: &str, color: &str, collapsed: bool) {
-    let symbol = match action {
-        "create" => "+",
-        "update" => "~",
-        "destroy" => "-",
-        "replace" => "-/+",
-        _ => "?",
-    };
-
-    let colored_symbol = match color {
-        "green" => symbol.bright_green().bold(),
-        "yellow" => symbol.bright_yellow().bold(),
-        "red" => symbol.bright_red().bold(),
-        _ => symbol.normal(),
-    };
-
-    let action_text = match action {
-        "create" => "created".bright_green(),
-        "update" => "changed".bright_yellow(),
-        "destroy" => "destroyed".bright_red(),
-        "replace" => "replaced".bright_yellow(),
-        _ => action.normal(),
-    };
-
-    let expand_indicator = if collapsed { "▶" } else { "▼" };
-
-    println!(
-        "{} {} {} will be {}",
-        expand_indicator.bright_black(),
-        colored_symbol,
-        change.address.bold(),
-        action_text
-    );
-
-    if !collapsed {
-        if action == "update" || action == "replace" {
-            print_changes(&change.change);
-        } else if action == "create" {
-            print_create_attributes(&change.change);
-        }
-    }
-
-    println!();
-}
 
 fn print_changes(change: &Change) {
     if let (Some(before), Some(after)) = (&change.before, &change.after) {
