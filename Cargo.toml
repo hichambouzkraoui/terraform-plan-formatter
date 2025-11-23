@@ -13,6 +13,10 @@ categories = ["command-line-utilities", "development-tools"]
 authors = ["Your Name <your.email@example.com>"]
 exclude = ["target/", ".github/", "Formula/", "snap/", "tools/"]
 
+[lib]
+name = "terraform_plan_formatter"
+path = "src/lib.rs"
+
 [[bin]]
 name = "tfplan"
 path = "src/main.rs"

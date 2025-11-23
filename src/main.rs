@@ -1,8 +1,8 @@
 use clap::Parser;
 use colored::*;
-use serde::Deserialize;
 use std::fs;
 use std::io::{self, Read, Write};
+use terraform_plan_formatter::{TerraformPlan, ResourceChange, Change};
 
 #[derive(Parser)]
 #[command(name = "tfplan")]
@@ -25,23 +25,7 @@ struct Cli {
     html: bool,
 }
 
-#[derive(Deserialize)]
-struct TerraformPlan {
-    resource_changes: Vec<ResourceChange>,
-}
 
-#[derive(Deserialize)]
-struct ResourceChange {
-    address: String,
-    change: Change,
-}
-
-#[derive(Deserialize)]
-struct Change {
-    actions: Vec<String>,
-    before: Option<serde_json::Value>,
-    after: Option<serde_json::Value>,
-}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
@@ -62,7 +46,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     } else if cli.interactive {
         interactive_format(&plan)?;
     } else {
-        format_plan(&plan, cli.collapsed);
+        print!("{}", terraform_plan_formatter::format_plan(&plan, cli.collapsed));
     }
 
     Ok(())
