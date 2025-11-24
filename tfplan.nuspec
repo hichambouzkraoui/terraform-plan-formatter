@@ -4,12 +4,12 @@
     <id>tfplan</id>
     <version>0.1.0</version>
     <packageSourceUrl>https://github.com/example/terraform-plan-formatter</packageSourceUrl>
-    <owners>example</owners>
+    <owners>Hicham Bouzkraoui</owners>
     <title>Terraform Plan Formatter</title>
-    <authors>Your Name</authors>
+    <authors>Hicham Bouzkraoui</authors>
     <projectUrl>https://github.com/example/terraform-plan-formatter</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/example/terraform-plan-formatter/main/icon.png</iconUrl>
-    <copyright>2024 Your Name</copyright>
+    <copyright>2024 Hicham Bouzkraoui</copyright>
     <licenseUrl>https://github.com/example/terraform-plan-formatter/blob/main/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <projectSourceUrl>https://github.com/example/terraform-plan-formatter</projectSourceUrl>

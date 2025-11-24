@@ -3,11 +3,11 @@ pkgname=tfplan
 pkgver=0.1.0
 pkgrel=0
 pkgdesc="A minimal CLI tool to format Terraform plan output"
-url="https://github.com/example/terraform-plan-formatter"
+url="https://github.com/hichambouzkraoui/terraform-plan-formatter"
 arch="all"
 license="MIT"
 makedepends="cargo"
-source="$pkgname-$pkgver.tar.gz::https://github.com/example/terraform-plan-formatter/archive/v$pkgver.tar.gz"
+source="$pkgname-$pkgver.tar.gz::https://github.com/hichambouzkraoui/terraform-plan-formatter/archive/v$pkgver.tar.gz"
 builddir="$srcdir/terraform-plan-formatter-$pkgver"
 
 build() {

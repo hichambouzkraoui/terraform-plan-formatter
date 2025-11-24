@@ -4,37 +4,42 @@ A minimal CLI tool to format Terraform plan output in a beautiful, human-readabl
 
 ## Installation
 
-### Quick Install (macOS/Linux)
-```bash
-curl -sSL https://raw.githubusercontent.com/example/terraform-plan-formatter/main/install.sh | bash
-```
-
-### Quick Install (Windows)
-```powershell
-iwr -useb https://raw.githubusercontent.com/example/terraform-plan-formatter/main/install.ps1 | iex
-```
-
 ### Package Managers
 
-#### Alpine Linux
+#### Homebrew (macOS/Linux)
 ```bash
-apk add tfplan
+brew install your-username/tap/tfplan
+```
+
+#### AUR (Arch Linux)
+```bash
+yay -S tfplan
+```
+
+#### Chocolatey (Windows)
+```powershell
+choco install tfplan
+```
+
+#### Snap (Linux)
+```bash
+snap install tfplan
 ```
 
 ### Manual Installation
 
 #### Download Pre-built Binaries
-1. Go to [Releases](https://github.com/example/terraform-plan-formatter/releases)
+1. Go to [Releases](https://github.com/hichambouzkraoui/terraform-plan-formatter/releases)
 2. Download the appropriate binary for your platform:
    - **macOS Intel**: `tfplan-v0.1.0-x86_64-apple-darwin.tar.gz`
    - **macOS Apple Silicon**: `tfplan-v0.1.0-aarch64-apple-darwin.tar.gz`
    - **Linux**: `tfplan-v0.1.0-x86_64-unknown-linux-gnu.tar.gz`
-   - **Windows**: `tfplan-v0.1.0-x86_64-pc-windows-gnu.zip`
+   - **Windows**: `tfplan-v0.1.0-x86_64-pc-windows-msvc.zip`
 3. Extract and place `tfplan` in your PATH
 
 #### Build from Source
 ```bash
-git clone https://github.com/example/terraform-plan-formatter.git
+git clone https://github.com/hichambouzkraoui/terraform-plan-formatter.git
 cd terraform-plan-formatter
 cargo build --release
 cp target/release/tfplan /usr/local/bin/
