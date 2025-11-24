@@ -1,23 +1,20 @@
 name: tfplan
 base: core22
 version: '0.1.0'
-summary: Format Terraform plan output in human-readable format
+summary: A minimal CLI tool to format Terraform plan output
 description: |
   A minimal CLI tool to format Terraform plan output in a beautiful, 
-  human-readable format with expandable HTML output. Features color-coded 
-  output, interactive mode, and cross-platform support.
+  human-readable format with expandable HTML output.
 
 grade: stable
 confinement: strict
 
-architectures:
-  - build-on: amd64
-  - build-on: arm64
-
 apps:
   tfplan:
     command: bin/tfplan
-    plugs: [home, network]
+    plugs:
+      - home
+      - network
 
 parts:
   tfplan:

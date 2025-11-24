@@ -122,7 +122,7 @@ jobs:
         with:
           token: ${{ secrets.HOMEBREW_TOKEN }}
           formula: tfplan
-          tap: your-username/homebrew-tap
+          tap: hichambouzkraoui/terraform-plan-formatter
           formula_path: Formula/tfplan.rb
 
   publish-aur:
@@ -140,17 +140,6 @@ jobs:
           commit_email: ${{ secrets.AUR_EMAIL }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
 
-  publish-chocolatey:
-    needs: release
-    runs-on: windows-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
-      - uses: actions/checkout@v4
-      - name: Pack and Push to Chocolatey
-        run: |
-          choco pack tfplan.nuspec
-          choco push --source https://push.chocolatey.org/ --api-key ${{ secrets.CHOCOLATEY_API_KEY }}
-
   publish-snap:
     needs: release
     runs-on: ubuntu-latest
@@ -165,6 +154,17 @@ jobs:
           release: stable
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
+
+  publish-chocolatey:
+    needs: release
+    runs-on: windows-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pack and Push to Chocolatey
+        run: |
+          choco pack tfplan.nuspec
+          choco push --source https://push.chocolatey.org/ --api-key ${{ secrets.CHOCOLATEY_API_KEY }}
 
   publish-apk:
     needs: release
